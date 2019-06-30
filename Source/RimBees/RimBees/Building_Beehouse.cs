@@ -51,6 +51,43 @@ namespace RimBees
 
         public Map map;
 
+        /// <summary>
+        /// Returns the graphic of the object.
+        /// The renderer will draw the needed object graphic from here.
+        /// </summary>
+        public override Graphic Graphic
+        {
+            get
+            {
+                var customSuffix = "";
+
+                if (BeehouseIsFull)
+                    customSuffix = "_NeedRecharge";
+                else if (innerContainerDrones.NullOrEmpty() || innerContainerQueens.NullOrEmpty())
+                    customSuffix = "_NoBees";
+                else if (flagInitializeConditions && !flagLight)
+                    customSuffix = "_NoLight";
+                else if (flagInitializeConditions && !flagRain)
+                    customSuffix = "_Rain";
+                else if (flagInitializeConditions && !flagTemperature)
+                    customSuffix = "_WrongTemperature";
+                else if (flagInitializeConditions && !flagPlants)
+                    customSuffix = "_NoPlants";
+                else if (!BeehouseIsRunning)
+                    customSuffix = "_Stopped";
+
+                if (string.IsNullOrEmpty(customSuffix))
+                    return base.Graphic;
+
+                return GraphicDatabase.Get(def.graphicData.graphicClass,
+                                           def.graphicData.texPath + customSuffix,
+                                           def.graphic.Shader,
+                                           def.graphicData.drawSize,
+                                           def.graphic.Color,
+                                           def.graphic.ColorTwo);
+            }
+        }
+
         public Building_Beehouse()
         {
             this.innerContainerDrones = new ThingOwner<Thing>(this, false, LookMode.Deep);

@@ -20,6 +20,35 @@ namespace RimBees
         private System.Random rand = new System.Random();
         private System.Random beeRandomizer = new System.Random();
 
+        /// <summary>
+        /// Returns the graphic of the object.
+        /// The renderer will draw the needed object graphic from here.
+        /// </summary>
+        public override Graphic Graphic
+        {
+            get
+            {
+                var customSuffix = "";
+
+                if (hybridizationChamberFull)
+                    customSuffix = "_NeedRecharge";
+                else if (string.IsNullOrEmpty(HybridizationChecker()))
+                    customSuffix = "_WrongBees";
+                else if (GetAdjacentBeehouse() == null
+                     || !GetAdjacentBeehouse().BeehouseIsRunning)
+                    customSuffix = "_Stopped";
+
+                if (string.IsNullOrEmpty(customSuffix))
+                    return base.Graphic;
+
+                return GraphicDatabase.Get(def.graphicData.graphicClass,
+                    def.graphicData.texPath + customSuffix,
+                    def.graphic.Shader,
+                    def.graphicData.drawSize,
+                    def.graphic.Color,
+                    def.graphic.ColorTwo);
+            }
+        }
 
         public override void SpawnSetup(Map map, bool respawningAfterLoad)
         {
@@ -76,6 +105,10 @@ namespace RimBees
         public override void TickRare()
         {
             base.TickRare();
+
+            if (GetAdjacentBeehouse() == null)
+                return;
+
             if (GetAdjacentBeehouse().BeehouseIsRunning && !hybridizationChamberFull)
             {
                 tickCounter++;
@@ -125,6 +158,10 @@ namespace RimBees
         {
             string beeDrone = "";
             string beeQueen = "";
+
+            if (GetAdjacentBeehouse() == null)
+                return string.Empty;
+
             if ((this.GetAdjacentBeehouse().innerContainerDrones.TotalStackCount>0)&& (this.GetAdjacentBeehouse().innerContainerQueens.TotalStackCount > 0)){
                 beeDrone = this.GetAdjacentBeehouse().innerContainerDrones.FirstOrFallback().TryGetComp<CompBees>().GetSpecies;
                 beeQueen = this.GetAdjacentBeehouse().innerContainerQueens.FirstOrFallback().TryGetComp<CompBees>().GetSpecies;

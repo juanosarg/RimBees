@@ -18,7 +18,33 @@ namespace RimBees
         public int daysTotal = 3;
         public bool broodChamberFull = false;
 
-      
+        /// <summary>
+        /// Returns the graphic of the object.
+        /// The renderer will draw the needed object graphic from here.
+        /// </summary>
+        public override Graphic Graphic
+        {
+            get
+            {
+                var customSuffix = "";
+
+                if (broodChamberFull)
+                    customSuffix = "_NeedRecharge";
+                else if (GetAdjacentBeehouse() == null
+                     || !GetAdjacentBeehouse().BeehouseIsRunning)
+                    customSuffix = "_Stopped";
+
+                if (string.IsNullOrEmpty(customSuffix))
+                    return base.Graphic;
+
+                return GraphicDatabase.Get(def.graphicData.graphicClass,
+                    def.graphicData.texPath + customSuffix,
+                    def.graphic.Shader,
+                    def.graphicData.drawSize,
+                    def.graphic.Color,
+                    def.graphic.ColorTwo);
+            }
+        }
 
         public override void ExposeData()
         {
@@ -68,6 +94,10 @@ namespace RimBees
         public override void TickRare()
         {
             base.TickRare();
+
+            if (GetAdjacentBeehouse() == null)
+                return;
+
             if (GetAdjacentBeehouse().BeehouseIsRunning && !broodChamberFull)
             {
                 tickCounter++;
@@ -76,7 +106,6 @@ namespace RimBees
                     SignalBroodChamberFull();
                 }
             }
-
         }
 
         public void SignalBroodChamberFull()
